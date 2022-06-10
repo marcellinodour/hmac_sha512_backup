@@ -1,5 +1,5 @@
-#include "hmac_sha512.h"
-#include "sha512.h"
+#include "Hmac_Sha512.h"
+#include "Sha512.h"
 
 #include <stdlib.h>
 #include <string.h>
