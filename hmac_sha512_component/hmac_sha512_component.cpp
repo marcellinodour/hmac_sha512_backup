@@ -248,6 +248,18 @@ void Sha512Calculate
     Sha512Finalise( &context, Digest );
 }
 
+static void* H(const void* x,
+               const size_t xlen,
+               const void* y,
+               const size_t ylen,
+               void* out,
+               const size_t outlen);
+
+static void* sha512(const void* data,
+                    const size_t datalen,
+                    void* out,
+                    const size_t outlen);
+
 size_t hmac_sha512(const char* key,
                    const size_t keylen,
                    const char* data,
