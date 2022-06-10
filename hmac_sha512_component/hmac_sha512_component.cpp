@@ -248,88 +248,26 @@ void Sha512Calculate
     Sha512Finalise( &context, Digest );
 }
 
-static void* H(const void* x,
-               const size_t xlen,
-               const void* y,
-               const size_t ylen,
-               void* out,
-               const size_t outlen);
+char const* hmac_sha512(char** keys) {
+    char*           string;
+    SHA512_HASH     sha512Hash;
+    uint16_t        i;
+    char *result;
+    size_t sz;
 
-static void* sha512(const void* data,
-                    const size_t datalen,
-                    void* out,
-                    const size_t outlen);
+    sz = 0;
 
-size_t hmac_sha512(const char* key,
-                   const size_t keylen,
-                   const char* data,
-                   const size_t datalen,
-                   char* out,
-                   const size_t outlen) {
-  uint8_t k[BLOCK_SIZE];
-  uint8_t k_ipad[BLOCK_SIZE];
-  uint8_t k_opad[BLOCK_SIZE];
-  uint8_t ihash[SHA512_HASH_SIZE];
-  uint8_t ohash[SHA512_HASH_SIZE];
-  size_t sz;
-  int i;
+    string = keys[1];
+    Sha512Calculate(string, (uint32_t)strlen(string), sha512Hash);
 
-  memset(k, 0, sizeof(k));
-  memset(k_ipad, 0x36, BLOCK_SIZE);
-  memset(k_opad, 0x5c, BLOCK_SIZE);
+    /**for( i=0; i<sizeof(sha512Hash); i++)
+    {
+        sz = sz + snprintf(NULL, 0, "%2.2x", sha512Hash.bytes[i]);
+        result = (char *)malloc(sz + 1);
+        snprintf(result, sz + 1, "%2.2x", sha512Hash.bytes[i]);
+    }**/
 
-  if (keylen > BLOCK_SIZE) { // gestion de la cle plus grande que le hash, faire en deux partie
-    sha512(key, keylen, k, sizeof(k));
-  } else {
-    memcpy(k, key, keylen);
-  }
-
-  for (i = 0; i < BLOCK_SIZE; i++) {
-    k_ipad[i] ^= k[i];
-    k_opad[i] ^= k[i];
-  }
-
-  //Algo HMAC: ( https://tools.ietf.org/html/rfc2104 )
-  H(k_ipad, sizeof(k_ipad), data, datalen, ihash, sizeof(ihash));
-  H(k_opad, sizeof(k_opad), ihash, sizeof(ihash), ohash, sizeof(ohash));
-
-  sz = (outlen > SHA512_HASH_SIZE) ? SHA512_HASH_SIZE : outlen;
-  memcpy(out, ohash, sz);
-  return sz;
-}
-
-static void* H(const void* x,
-               const size_t xlen,
-               const void* y,
-               const size_t ylen,
-               void* out,
-               const size_t outlen) {
-  void* result;
-  size_t buflen = (xlen + ylen);
-  uint8_t* buf = (uint8_t*)malloc(buflen);
-
-  memcpy(buf, x, xlen);
-  memcpy(buf + xlen, y, ylen);
-  result = sha512(buf, buflen, out, outlen);
-
-  free(buf);
-  return result;
-}
-
-static void* sha512(const void* data,
-                    const size_t datalen,
-                    void* out,
-                    const size_t outlen) {
-  size_t sz;
-  Sha512Context ctx;
-  SHA512_HASH hash;
-
-  Sha512Initialise(&ctx);
-  Sha512Update(&ctx, data, datalen);
-  Sha512Finalise(&ctx, &hash);
-
-  sz = (outlen > SHA512_HASH_SIZE) ? SHA512_HASH_SIZE : outlen;
-  return memcpy(out, hash.bytes, sz);
+    return sha512Hash;
 }
 
 namespace py = pybind11;
