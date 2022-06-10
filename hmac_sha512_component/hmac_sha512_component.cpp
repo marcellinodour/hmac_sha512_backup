@@ -1,19 +1,44 @@
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  WjCryptLib_Sha512
-//
-//  Implementation of SHA512 hash function.
-//  Original author: Tom St Denis, tomstdenis@gmail.com, http://libtom.org
-//  Modified by WaterJuice retaining Public Domain license.
-//
-//  This is free and unencumbered software released into the public domain - June 2013 waterjuice.org
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  IMPORTS
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 #include <stdint.h>
 #include <stdio.h>
+#include <memory.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pybind11/pybind11.h>
+
+#define BLOCK_SIZE                  128
+#define SHA512_HASH_SIZE           ( 512 / 8 )
+
+#define ROR64( value, bits ) (((value) >> (bits)) | ((value) << (64 - (bits))))
+#define MIN( x, y ) ( ((x)<(y))?(x):(y) )
+#define LOAD64H( x, y )                                                      \
+   { x = (((uint64_t)((y)[0] & 255))<<56)|(((uint64_t)((y)[1] & 255))<<48) | \
+         (((uint64_t)((y)[2] & 255))<<40)|(((uint64_t)((y)[3] & 255))<<32) | \
+         (((uint64_t)((y)[4] & 255))<<24)|(((uint64_t)((y)[5] & 255))<<16) | \
+         (((uint64_t)((y)[6] & 255))<<8)|(((uint64_t)((y)[7] & 255))); }
+#define STORE64H( x, y )                                                                     \
+   { (y)[0] = (uint8_t)(((x)>>56)&255); (y)[1] = (uint8_t)(((x)>>48)&255);     \
+     (y)[2] = (uint8_t)(((x)>>40)&255); (y)[3] = (uint8_t)(((x)>>32)&255);     \
+     (y)[4] = (uint8_t)(((x)>>24)&255); (y)[5] = (uint8_t)(((x)>>16)&255);     \
+     (y)[6] = (uint8_t)(((x)>>8)&255); (y)[7] = (uint8_t)((x)&255); }
+
+#define Ch( x, y, z )     (z ^ (x & (y ^ z)))
+#define Maj(x, y, z )     (((x | y) & z) | (x & y))
+#define S( x, n )         ROR64( x, n )
+#define R_r( x, n )         (((x)&0xFFFFFFFFFFFFFFFFULL)>>((uint64_t)n))
+#define Sigma0( x )       (S(x, 28) ^ S(x, 34) ^ S(x, 39))
+#define Sigma1( x )       (S(x, 14) ^ S(x, 18) ^ S(x, 41))
+#define Gamma0( x )       (S(x, 1) ^ S(x, 8) ^ R_r(x, 7))
+#define Gamma1( x )       (S(x, 19) ^ S(x, 61) ^ R_r(x, 6))
+
+#define Sha512Round( a, b, c, d, e, f, g, h, i )       \
+     t0 = h + Sigma1(e) + Ch(e, f, g) + K[i] + W[i];   \
+     t1 = Sigma0(a) + Maj(a, b, c);                    \
+     d += t0;                                          \
+     h  = t0 + t1;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// L'extrait du code suivant a été inspiré du projet de WjCryptLib_Sha512 (WaterJuice retaining Public Domain license.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 typedef struct
 {
@@ -23,94 +48,10 @@ typedef struct
     uint8_t     buf[128];
 } Sha512Context;
 
-#define SHA512_HASH_SIZE           ( 512 / 8 )
-
 typedef struct
 {
     uint8_t      bytes [SHA512_HASH_SIZE];
 } SHA512_HASH;
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  PUBLIC FUNCTIONS
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  Sha512Initialise
-//
-//  Initialises a SHA512 Context. Use this to initialise/reset a context.
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void
-    Sha512Initialise
-    (
-        Sha512Context*      Context         // [out]
-    );
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  Sha512Update
-//
-//  Adds data to the SHA512 context. This will process the data and update the internal state of the context. Keep on
-//  calling this function until all the data has been added. Then call Sha512Finalise to calculate the hash.
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void
-    Sha512Update
-    (
-        Sha512Context*      Context,        // [in out]
-        void const*         Buffer,         // [in]
-        uint32_t            BufferSize      // [in]
-    );
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  Sha512Finalise
-//
-//  Performs the final calculation of the hash and returns the digest (64 byte buffer containing 512bit hash). After
-//  calling this, Sha512Initialised must be used to reuse the context.
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void
-    Sha512Finalise
-    (
-        Sha512Context*      Context,        // [in out]
-        SHA512_HASH*        Digest          // [out]
-    );
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  WjCryptLib_Sha512
-//
-//  Implementation of SHA512 hash function.
-//  Original author: Tom St Denis, tomstdenis@gmail.com, http://libtom.org
-//  Modified by WaterJuice retaining Public Domain license.
-//
-//  This is free and unencumbered software released into the public domain - June 2013 waterjuice.org
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  IMPORTS
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#include <memory.h>
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  MACROS
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-#define ROR64( value, bits ) (((value) >> (bits)) | ((value) << (64 - (bits))))
-
-#define MIN( x, y ) ( ((x)<(y))?(x):(y) )
-
-#define LOAD64H( x, y )                                                      \
-   { x = (((uint64_t)((y)[0] & 255))<<56)|(((uint64_t)((y)[1] & 255))<<48) | \
-         (((uint64_t)((y)[2] & 255))<<40)|(((uint64_t)((y)[3] & 255))<<32) | \
-         (((uint64_t)((y)[4] & 255))<<24)|(((uint64_t)((y)[5] & 255))<<16) | \
-         (((uint64_t)((y)[6] & 255))<<8)|(((uint64_t)((y)[7] & 255))); }
-
-#define STORE64H( x, y )                                                                     \
-   { (y)[0] = (uint8_t)(((x)>>56)&255); (y)[1] = (uint8_t)(((x)>>48)&255);     \
-     (y)[2] = (uint8_t)(((x)>>40)&255); (y)[3] = (uint8_t)(((x)>>32)&255);     \
-     (y)[4] = (uint8_t)(((x)>>24)&255); (y)[5] = (uint8_t)(((x)>>16)&255);     \
-     (y)[6] = (uint8_t)(((x)>>8)&255); (y)[7] = (uint8_t)((x)&255); }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  CONSTANTS
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // The K array
 static const uint64_t K[80] = {
@@ -136,36 +77,7 @@ static const uint64_t K[80] = {
     0x4cc5d4becb3e42b6ULL, 0x597f299cfc657e2aULL, 0x5fcb6fab3ad6faecULL, 0x6c44198c4a475817ULL
 };
 
-#define BLOCK_SIZE          128
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  INTERNAL FUNCTIONS
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// Various logical functions
-#define Ch( x, y, z )     (z ^ (x & (y ^ z)))
-#define Maj(x, y, z )     (((x | y) & z) | (x & y))
-#define S( x, n )         ROR64( x, n )
-#define R_r( x, n )         (((x)&0xFFFFFFFFFFFFFFFFULL)>>((uint64_t)n))
-#define Sigma0( x )       (S(x, 28) ^ S(x, 34) ^ S(x, 39))
-#define Sigma1( x )       (S(x, 14) ^ S(x, 18) ^ S(x, 41))
-#define Gamma0( x )       (S(x, 1) ^ S(x, 8) ^ R_r(x, 7))
-#define Gamma1( x )       (S(x, 19) ^ S(x, 61) ^ R_r(x, 6))
-
-#define Sha512Round( a, b, c, d, e, f, g, h, i )       \
-     t0 = h + Sigma1(e) + Ch(e, f, g) + K[i] + W[i];   \
-     t1 = Sigma0(a) + Maj(a, b, c);                    \
-     d += t0;                                          \
-     h  = t0 + t1;
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  TransformFunction
-//
-//  Compress 1024-bits
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-static
-void
-    TransformFunction
+static void TransformFunction
     (
         Sha512Context*          Context,
         uint8_t const*          Buffer
@@ -215,19 +127,9 @@ void
     }
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  PUBLIC FUNCTIONS
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  Sha512Initialise
-//
-//  Initialises a SHA512 Context. Use this to initialise/reset a context.
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void
-    Sha512Initialise
+void Sha512Initialise
     (
-        Sha512Context*      Context         // [out]
+        Sha512Context*      Context
     )
 {
     Context->curlen = 0;
@@ -242,18 +144,11 @@ void
     Context->state[7] = 0x5be0cd19137e2179ULL;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  Sha512Update
-//
-//  Adds data to the SHA512 context. This will process the data and update the internal state of the context. Keep on
-//  calling this function until all the data has been added. Then call Sha512Finalise to calculate the hash.
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void
-    Sha512Update
+void Sha512Update
     (
-        Sha512Context*      Context,        // [in out]
-        void const*         Buffer,         // [in]
-        uint32_t            BufferSize      // [in]
+        Sha512Context*      Context,
+        void const*         Buffer,
+        uint32_t            BufferSize
     )
 {
     uint32_t    n;
@@ -289,14 +184,7 @@ void
     }
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  Sha512Finalise
-//
-//  Performs the final calculation of the hash and returns the digest (64 byte buffer containing 512bit hash). After
-//  calling this, Sha512Initialised must be used to reuse the context.
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void
-    Sha512Finalise
+void Sha512Finalise
     (
         Sha512Context*      Context,        // [in out]
         SHA512_HASH*        Digest          // [out]
@@ -346,15 +234,7 @@ void
         STORE64H( Context->state[i], Digest->bytes+(8*i) );
     }
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//  Sha512Calculate
-//
-//  Combines Sha512Initialise, Sha512Update, and Sha512Finalise into one function. Calculates the SHA512 hash of the
-//  buffer.
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void
-    Sha512Calculate
+void Sha512Calculate
     (
         void  const*        Buffer,         // [in]
         uint32_t            BufferSize,     // [in]
@@ -368,62 +248,31 @@ void
     Sha512Finalise( &context, Digest );
 }
 
-size_t  hmac_sha512( // Retourne nombre de bytes ecrit dans le `out`
-    // [in]: les cles et sa taille
-    const void* key,
-    const size_t keylen,
-
-    // [in]: les donnees a hasher et sa taille
-    const void* data,
-    const size_t datalen,
-
-    // [out]: le output et sa taille
-    void* out,
-    const size_t outlen);
-	
-#include <stdlib.h>
-#include <string.h>
-#include <pybind11/pybind11.h>
-
-#define SHA512_BLOCK_SIZE 128
-
-static void* H(const void* x,
-               const size_t xlen,
-               const void* y,
-               const size_t ylen,
-               void* out,
-               const size_t outlen);
-
-static void* sha512(const void* data,
-                    const size_t datalen,
-                    void* out,
-                    const size_t outlen);
-
-size_t hmac_sha512(const void* key,
+size_t hmac_sha512(const char* key,
                    const size_t keylen,
-                   const void* data,
+                   const char* data,
                    const size_t datalen,
-                   void* out,
+                   char* out,
                    const size_t outlen) {
-  uint8_t k[SHA512_BLOCK_SIZE];
-  uint8_t k_ipad[SHA512_BLOCK_SIZE];
-  uint8_t k_opad[SHA512_BLOCK_SIZE];
+  uint8_t k[BLOCK_SIZE];
+  uint8_t k_ipad[BLOCK_SIZE];
+  uint8_t k_opad[BLOCK_SIZE];
   uint8_t ihash[SHA512_HASH_SIZE];
   uint8_t ohash[SHA512_HASH_SIZE];
   size_t sz;
   int i;
 
   memset(k, 0, sizeof(k));
-  memset(k_ipad, 0x36, SHA512_BLOCK_SIZE);
-  memset(k_opad, 0x5c, SHA512_BLOCK_SIZE);
+  memset(k_ipad, 0x36, BLOCK_SIZE);
+  memset(k_opad, 0x5c, BLOCK_SIZE);
 
-  if (keylen > SHA512_BLOCK_SIZE) { // gestion de la cle plus grande que le hash, faire en deux partie
+  if (keylen > BLOCK_SIZE) { // gestion de la cle plus grande que le hash, faire en deux partie
     sha512(key, keylen, k, sizeof(k));
   } else {
     memcpy(k, key, keylen);
   }
 
-  for (i = 0; i < SHA512_BLOCK_SIZE; i++) {
+  for (i = 0; i < BLOCK_SIZE; i++) {
     k_ipad[i] ^= k[i];
     k_opad[i] ^= k[i];
   }
