@@ -248,26 +248,33 @@ void Sha512Calculate
     Sha512Finalise( &context, Digest );
 }
 
-char const* hmac_sha512(char** keys) {
-    char*           string;
-    SHA512_HASH     sha512Hash;
-    uint16_t        i;
-    char *result;
-    size_t sz;
+char const* hmac_sha512(char* keys) {
+	Sha512Context 	context;    
+	char*           string;
+    	SHA512_HASH	sha512Hash;
+    	uint16_t        i;
+    	char* 		result;
+	char*		res;
+	size_t 		sz;
+	
+	sz = 0;
+	string = keys;
 
-    sz = 0;
+	Sha512Initialise( &context );
+	Sha512Update( &context, string, (uint32_t)strlen(string));
+	Sha512Finalise( &context, &sha512Hash );
 
-    string = keys[1];
-    Sha512Calculate(string, (uint32_t)strlen(string), sha512Hash);
-
-    /**for( i=0; i<sizeof(sha512Hash); i++)
-    {
-        sz = sz + snprintf(NULL, 0, "%2.2x", sha512Hash.bytes[i]);
-        result = (char *)malloc(sz + 1);
-        snprintf(result, sz + 1, "%2.2x", sha512Hash.bytes[i]);
-    }**/
-
-    return sha512Hash;
+	sz = snprintf(NULL, 0, "%2.2x", sha512Hash.bytes[0]);
+	result = (char *)malloc(sizeof(sha512Hash) * sz + 1);
+ 
+	for( i=0; i<sizeof(sha512Hash); i++ )
+    	{
+		res = (char *)malloc(sz + 1);
+		snprintf(res, sz + 1, "%2.2x", sha512Hash.bytes[i]);
+		strcat(result, res);
+    	};
+	
+    	return result;
 }
 
 namespace py = pybind11;
