@@ -1,12 +1,14 @@
 # hmac_sha512
 
 The dev team is :
-- Marcellino DOUR
-- Raphaël PARDINI
+- [Marcellino DOUR](https://github.com/marcellinodour)
+- [Raphaël PARDINI](https://github.com/Raphda)
 
-## Specification
+The teacher is [José Luu](https://github.com/jluuM2).
 
-You can found the specification of our component sha512 here : lien
+## Documentation 
+
+You can found the specification of our component **sha512** here : [lien](https://google.com)
 
 ## Installation
 
