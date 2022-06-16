@@ -14,13 +14,13 @@ You can found the specification of our component **sha512** here : [lien à veni
 
 1. Initialize dependencies :
 ```
-cd project_blockchain_python
+cd hmac_sha512
 git submodule init
 git submodule update
 ```
 2. Compile :
 ```
-cd hmac_sha512
+cd hmac_sha512_component
 make
 ```
 
