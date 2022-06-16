@@ -8,7 +8,7 @@ The teacher is [José Luu](https://github.com/jluuM2).
 
 ## Documentation 
 
-You can found the specification of our component **sha512** here : [lien à venir](https://google.com)
+You can found the specification of our component **sha512** here : [Specification_SHA512](https://github.com/marcellinodour/hmac_sha512/blob/main/Specifications_SHA512.pdf)
 
 ## Installation
 
