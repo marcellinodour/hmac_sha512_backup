@@ -29,9 +29,10 @@ make
 Open a python3 console and use theses commands :
 ```
 >>> import hmac_sha512_component
->>> data = "annuel claquer score gymnaste anonyme immobile unique scélérat péplum distance double conduire flasque nombreux langage" #example
+>>> data = "0c79bfa8d9c63b4f471484a98651012e250ba0280335ce62dd57ef63fefd242c357339067b326fdbc40bbd9de372a1dda1448127d15ca53e23f87b232ed2ba89" #example
 >>> key = hmac_sha512_component.hmac_sha512(data)
 >>> print(key)
-1b52c6509e63c0b6751a19b922a91497f6d1b458472cf86980b74cec92ca0dcfe24ddbf8dcba81c14972025552b8039f856e54d6e8fe5143be5d30a98d1207df
+a547a4735fca6fc9a9f181908946ca32b5761587ea334a8a7d71828a6c4b0b403c633840acfc405866e90e8b269acee3fa8b1dc4f3baf31e100b17559b16fd4f
 >>>
 
+Or, open a C++ console and use theses commands :
