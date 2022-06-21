@@ -33,7 +33,6 @@ Open a python3 console and use theses commands :
 >>> key = hmac_sha512_component.hmac_sha512(data)
 >>> print(key)
 a547a4735fca6fc9a9f181908946ca32b5761587ea334a8a7d71828a6c4b0b403c633840acfc405866e90e8b269acee3fa8b1dc4f3baf31e100b17559b16fd4f
->>>
-
+```
 
 Or, open a C++ console and use theses commands :
