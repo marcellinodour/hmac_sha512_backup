@@ -1,5 +1,6 @@
-#ifndef FILE_H_INCLUDED
-#define FILE_H_INCLUDED
+#pragma once
+#ifndef HMAC_SHA512_COMPONENT_H
+#define HMAC_SHA512_COMPONENT_H
 
 #include <string>
 #define BLOCK_SIZE                  128
