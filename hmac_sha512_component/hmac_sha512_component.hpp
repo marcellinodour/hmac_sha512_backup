@@ -5,8 +5,6 @@
 #define BLOCK_SIZE                  128
 #define SHA512_HASH_SIZE           ( 512 / 8 )
 
-using namespace std;
-
 typedef struct
 {
     uint64_t    length;
