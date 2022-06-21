@@ -41,7 +41,7 @@
 // L'extrait du code suivant a été inspiré du projet de WjCryptLib_Sha512 (WaterJuice retaining Public Domain license.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-typedef struct
+/*typedef struct
 {
     uint64_t    length;
     uint64_t    state[8];
@@ -76,7 +76,7 @@ static const uint64_t K[80] = {
     0x06f067aa72176fbaULL, 0x0a637dc5a2c898a6ULL, 0x113f9804bef90daeULL, 0x1b710b35131c471bULL,
     0x28db77f523047d84ULL, 0x32caab7b40c72493ULL, 0x3c9ebe0a15c9bebcULL, 0x431d67c49c100d4cULL,
     0x4cc5d4becb3e42b6ULL, 0x597f299cfc657e2aULL, 0x5fcb6fab3ad6faecULL, 0x6c44198c4a475817ULL
-};
+};*/
 
 static void TransformFunction
     (

@@ -1,6 +1,12 @@
 #ifndef FILE_H_INCLUDED
 #define FILE_H_INCLUDED
 
+#include <string.h>
+#define BLOCK_SIZE                  128
+#define SHA512_HASH_SIZE           ( 512 / 8 )
+
+using namespace std;
+
 typedef struct
 {
     uint64_t    length;
@@ -42,6 +48,6 @@ void Sha512Initialise(Sha512Context* Context);
 void Sha512Update(Sha512Context* Context, void const* Buffer, uint32_t BufferSize);
 void Sha512Finalise(Sha512Context* Context, SHA512_HASH* Digest);
 void Sha512Calculate(void  const* Buffer,uint32_t BufferSize, SHA512_HASH* Digest);
-std::string hmac_sha512(char* keys);
+string hmac_sha512(char* keys);
 
 #endif // FILE_H_INCLUDED
