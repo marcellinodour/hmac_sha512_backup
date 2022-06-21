@@ -48,6 +48,6 @@ void Sha512Initialise(Sha512Context* Context);
 void Sha512Update(Sha512Context* Context, void const* Buffer, uint32_t BufferSize);
 void Sha512Finalise(Sha512Context* Context, SHA512_HASH* Digest);
 void Sha512Calculate(void  const* Buffer,uint32_t BufferSize, SHA512_HASH* Digest);
-string hmac_sha512(char* keys);
+std::string hmac_sha512(char* keys);
 
 #endif // FILE_H_INCLUDED
