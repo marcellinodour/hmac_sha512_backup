@@ -3,6 +3,7 @@
 #include <memory.h>
 #include <stdlib.h>
 #include <string.h>
+#include "hmac_sha512_component.hpp"
 #include <pybind11/pybind11.h>
 
 #define BLOCK_SIZE                  128
@@ -249,31 +250,21 @@ void Sha512Calculate
 }
 
 std::string hmac_sha512(char* keys) {
-	Sha512Context 	context;    
+	Sha512Context 	context;
 	char*           string;
-    	SHA512_HASH	sha512Hash;
-    	uint16_t        i;
-    	char* 		result;
+    SHA512_HASH	sha512Hash;
+    /*uint16_t        i;
+    char* 		result;
 	char*		res;
 	size_t 		sz;
-	
-	sz = 0;
+
+	sz = 0;*/
 	string = keys;
-	
+
 	Sha512Initialise( &context );
 	Sha512Update( &context, string, (uint32_t)strlen(string));
 	Sha512Finalise( &context, &sha512Hash );
 
-	/*sz = snprintf(NULL, 0, "%2.2x", sha512Hash.bytes[0]);
-	result = (char *)malloc(sizeof(sha512Hash) * sz + 1);
- 
-	for( i=0; i<sizeof(sha512Hash); i++ )
-    	{
-		res = (char *)malloc(512);
-		snprintf(res, sz + 1, "%2.2x", sha512Hash.bytes[i]);
-		strcat(result, res);
-    	};*/
-	
 	char buf[2*SHA512_HASH_SIZE+1];
 	buf[2*SHA512_HASH_SIZE] = 0;
 	for (int i = 0; i < SHA512_HASH_SIZE; i++)
