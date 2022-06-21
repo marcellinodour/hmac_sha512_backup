@@ -1,7 +1,7 @@
 #ifndef FILE_H_INCLUDED
 #define FILE_H_INCLUDED
 
-#include <string.h>
+#include <string>
 #define BLOCK_SIZE                  128
 #define SHA512_HASH_SIZE           ( 512 / 8 )
 
