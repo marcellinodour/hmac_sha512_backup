@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "hmac_sha512_component.hpp"
-#include <pybind11/pybind11.h>
 
 #define BLOCK_SIZE                  128
 #define SHA512_HASH_SIZE           ( 512 / 8 )
@@ -41,7 +40,7 @@
 // L'extrait du code suivant a été inspiré du projet de WjCryptLib_Sha512 (WaterJuice retaining Public Domain license.
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/*typedef struct
+typedef struct
 {
     uint64_t    length;
     uint64_t    state[8];
@@ -76,7 +75,7 @@ static const uint64_t K[80] = {
     0x06f067aa72176fbaULL, 0x0a637dc5a2c898a6ULL, 0x113f9804bef90daeULL, 0x1b710b35131c471bULL,
     0x28db77f523047d84ULL, 0x32caab7b40c72493ULL, 0x3c9ebe0a15c9bebcULL, 0x431d67c49c100d4cULL,
     0x4cc5d4becb3e42b6ULL, 0x597f299cfc657e2aULL, 0x5fcb6fab3ad6faecULL, 0x6c44198c4a475817ULL
-};*/
+};
 
 static void TransformFunction
     (
@@ -252,13 +251,7 @@ void Sha512Calculate
 std::string hmac_sha512(char* keys) {
 	Sha512Context 	context;
 	char*           string;
-    SHA512_HASH	sha512Hash;
-    /*uint16_t        i;
-    char* 		result;
-	char*		res;
-	size_t 		sz;
-
-	sz = 0;*/
+    	SHA512_HASH	sha512Hash;
 	string = keys;
 
 	Sha512Initialise( &context );
@@ -271,6 +264,8 @@ std::string hmac_sha512(char* keys) {
 		sprintf(buf+i*2, "%02x", sha512Hash.bytes[i]);
 	return std::string(buf);
 }
+
+#include <pybind11/pybind11.h>
 
 namespace py = pybind11;
 

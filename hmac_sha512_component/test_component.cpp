@@ -1,4 +1,4 @@
-#include "hmac_sha512_component.cpp"
+#include "hmac_sha512_component.hpp"
 #include <iostream>
 
 using namespace std;
